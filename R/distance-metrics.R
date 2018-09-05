@@ -38,8 +38,8 @@ subgraph_dist <- function(x,y) {
 
     subgraphs <- unlist(lapply(subgraph_sizes, function(size) {combn(rownames(y), size, simplify=F)}), recursive=FALSE)
 
-    ix <- graph_from_adjacency_matrix(x)
-    iy <- graph_from_adjacency_matrix(y[rownames(x), colnames(x)])
+    ix <- igraph::graph_from_adjacency_matrix(x)
+    iy <- igraph::graph_from_adjacency_matrix(y[rownames(x), colnames(x)])
 
     isomorphic <- unlist(lapply(subgraphs, function(subgraph) {isomorphic(induced_subgraph(ix, subgraph), induced_subgraph(iy, subgraph))}))
 
@@ -71,11 +71,11 @@ trans_dist <- function(x,y) {
     stopifnot(all.equal(sort(rownames(y)), sort(colnames(y))))
     stopifnot(all.equal(nrow(x), nrow(y)))
 
-    ix <- graph_from_adjacency_matrix(x)
-    iy <- graph_from_adjacency_matrix(y[rownames(x), colnames(x)])
+    ix <- igraph::graph_from_adjacency_matrix(x)
+    iy <- igraph::graph_from_adjacency_matrix(y[rownames(x), colnames(x)])
 
-    dx <- distances(ix, mode="out")
-    dy <- distances(iy, mode="out")
+    dx <- igraph::distances(ix, mode="out")
+    dy <- igraph::distances(iy, mode="out")
 
     score <- 0
     for (a in rownames(dx)) {
@@ -144,27 +144,27 @@ plot_dist <- function(l, distance_function, filename="") {
     # generate network images
     images <- l
     for (i in 1:nrow(l_dists)) {
-        net <- as.network(l[[i]], matrix.type="adjacency", directed=TRUE)
+        net <- network::as.network(l[[i]], matrix.type="adjacency", directed=TRUE)
         # TODO: scale the sizes as a function of the number of nodes and networks
-        images[[i]] <- ggnet2(net, mode="circle", label=TRUE, alpha=0, arrow.size=3, arrow.gap=.02, label.size=2)
+        images[[i]] <- GGally::ggnet2(net, mode="circle", label=TRUE, alpha=0, arrow.size=3, arrow.gap=.02, label.size=2)
     }
-    plot_networks <- do.call(grid.arrange, c(images, ncol = length(images)))
+    plot_networks <- do.call(gridExtra::grid.arrange, c(images, ncol = length(images)))
 
     # turn matrix into long data format
     colnames(l_dists) <- letters[1:nrow(l_dists)]
-    l_dists_t <- tbl_df(l_dists)
+    l_dists_t <- dplyr::tbl_df(l_dists)
     l_dists_t$graph_name <- letters[1:nrow(l_dists)]
-    l_dists_melt <- melt(l_dists_t, id.vars="graph_name") %>% rename(graph_name_y = variable)
+    l_dists_melt <- reshape2::melt(l_dists_t, id.vars="graph_name") %>% rename(graph_name_y = variable)
 
     # generate the heatmap
-    plot_heatmap <- ggplot(l_dists_melt, aes(x=graph_name, y=graph_name_y, label=value, fill=value)) + geom_tile() + geom_text() + scale_y_discrete(limits=rev(levels(l_dists_melt$graph_name_y))) + theme_void() + coord_fixed() + scale_fill_distiller(guide=FALSE, palette="Blues", direction=1) 
+    plot_heatmap <- ggplot2::ggplot(l_dists_melt, aes(x=graph_name, y=graph_name_y, label=value, fill=value)) + geom_tile() + geom_text() + scale_y_discrete(limits=rev(levels(l_dists_melt$graph_name_y))) + theme_void() + coord_fixed() + scale_fill_distiller(guide=FALSE, palette="Blues", direction=1) 
     
     # there must be a better way to do this, but everything else seems broken
     if (filename != "") {
         pdf(filename)
-        grid.arrange(plot_networks, plot_heatmap, nrow=2)
+        gridExtra::grid.arrange(plot_networks, plot_heatmap, nrow=2)
         dev.off()
     }
-    grid.arrange(plot_networks, plot_heatmap, nrow=2)
+    gridExtra::grid.arrange(plot_networks, plot_heatmap, nrow=2)
 }
 
