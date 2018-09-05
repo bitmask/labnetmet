@@ -154,7 +154,7 @@ plot_dist <- function(l, distance_function, filename="") {
     colnames(l_dists) <- letters[1:nrow(l_dists)]
     l_dists_t <- dplyr::tbl_df(l_dists)
     l_dists_t$graph_name <- letters[1:nrow(l_dists)]
-    l_dists_melt <- reshape2::melt(l_dists_t, id.vars="graph_name") %>% rename(graph_name_y = variable)
+    l_dists_melt <- reshape2::melt(l_dists_t, id.vars="graph_name") %>% dplyr::rename(graph_name_y = variable)
 
     # generate the heatmap
     plot_heatmap <- ggplot2::ggplot(l_dists_melt, aes(x=graph_name, y=graph_name_y, label=value, fill=value)) + geom_tile() + geom_text() + scale_y_discrete(limits=rev(levels(l_dists_melt$graph_name_y))) + theme_void() + coord_fixed() + scale_fill_distiller(guide=FALSE, palette="Blues", direction=1) 
