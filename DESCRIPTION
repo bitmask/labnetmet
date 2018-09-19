@@ -16,7 +16,8 @@ Imports:
     gridGraphics,
     network,
     GGally,
-    igraph
+    igraph,
+    magrittr
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
