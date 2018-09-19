@@ -75,6 +75,13 @@ test_that("3d tests", {
 
     expect_equal(trans_dist(a3, ai3), 3)
     expect_equal(trans_dist(ai3, a3), 3)
+
+    # triangle inequality
+    c3 <- matrix( c(0, 1, 1,  0, 0, 0,  0, 0, 0), nrow=3, ncol=3, byrow=TRUE)
+    dimnames(c3) <- list(c("A", "B", "C"), c("A", "B", "C"))
+    expect_true(trans_dist(a3, b3) + trans_dist(b3, c3) >= trans_dist(a3,c3))
+    expect_true(trans_dist(a3, c3) + trans_dist(c3, b3) >= trans_dist(a3,b3))
+    expect_true(trans_dist(c3, a3) + trans_dist(a3, b3) >= trans_dist(c3,b3))
 })
 
 test_that("4d tests", {
@@ -156,6 +163,21 @@ test_that("triangle inequality holds", {
     near2 <- trans_dist(i4,j4)
     far <- trans_dist(h4,j4)
     expect_true(near1 + near2 >= far)
+
+    # bigger example
+    x5 <- matrix( c(0, 1, 0, 0, 0,  0, 0, 1, 0, 0,  0, 0, 0, 1, 0,  0, 0, 0, 0, 1,  0, 0, 0, 0, 0), nrow=5, ncol=5, byrow=TRUE)
+    dimnames(x5) <- list(c("A", "B", "C", "D", "E"), c("A", "B", "C", "D", "E"))
+
+    y5 <- matrix( c(0, 0, 0, 0, 1,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0), nrow=5, ncol=5, byrow=TRUE)
+    dimnames(y5) <- list(c("A", "B", "C", "D", "E"), c("A", "B", "C", "D", "E"))
+
+    z5 <- matrix( c(0, 0, 0, 0, 0,  0, 0, 1, 0, 0,  0, 0, 0, 1, 0,  0, 0, 0, 0, 1,  0, 0, 0, 0, 0), nrow=5, ncol=5, byrow=TRUE)
+    dimnames(z5) <- list(c("A", "B", "C", "D", "E"), c("A", "B", "C", "D", "E"))
+
+    expect_true(trans_dist(x5, y5) + trans_dist(y5, z5) >= trans_dist(x5,z5))
+    expect_true(trans_dist(x5, z5) + trans_dist(z5, y5) >= trans_dist(x5,y5))
+    expect_true(trans_dist(z5, x5) + trans_dist(x5, y5) >= trans_dist(z5,y5))
+
 })
 
 test_that("inverse cascade is maximally different", {
