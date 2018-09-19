@@ -23,10 +23,8 @@ Calculate distances with hamming_dist, subgraph_dist or trans_dist to calculate 
 
 Maintainer: \packageMaintainer{labnetmet}
 }
-\references{
-}
 \keyword{ package }
-\seealso{
+\seealso{ igraph
 }
 \examples{
 a1 <- matrix( c(0, 1, 1, 1,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0), nrow=4, ncol=4, byrow=TRUE)
@@ -45,5 +43,8 @@ dimnames(a3) <- list(c("A", "B", "C", "D"), c("A", "B", "C", "D"))
 a4 <- matrix( c(0, 1, 0, 1,  0, 0, 1, 0,  0, 1, 0, 0,  1, 1, 1, 1), nrow=4, ncol=4, byrow=TRUE)
 dimnames(a4) <- list(c("A", "B", "C", "D"), c("A", "B", "C", "D"))
 
-labnetmet::plot_dist(list(a1, a2, a3, a4), trans_dist, "~/filename.pdf")
+l <- list(a1, a2, a3, a4)
+generate_distances(l, trans_dist)
+
+#labnetmet::plot_dist(l, trans_dist, "~/filename.pdf")
 }

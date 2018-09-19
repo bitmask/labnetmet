@@ -10,6 +10,8 @@ plot_dist(l, distance_function, filename = "")
 \item{l}{A list of adjacency matricies representing the networks of interest}
 
 \item{distance_function}{One of the distance metrics defined in this package}
+
+\item{filename}{(optional) File to write plot out to}
 }
 \value{
 Plot object

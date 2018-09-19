@@ -1,8 +1,13 @@
+
+# prevent devtools::check() from throwing warnings about these names that are not even global variables
+utils::globalVariables(c("variable", "value", "graph_name", "graph_name_y"))
+
 #' Find the Hamming distance between two graphs as sum of the absolute value differences between adjacency matricies.
 #'
 #' @param x An adjacency matrix
 #' @param y An adjacency matrix
 #' @return Number representing the distance between x and y
+#' @export
 hamming_dist <- function(x,y) {
     stopifnot(all.equal(sort(rownames(x)), sort(colnames(x))))
     stopifnot(all.equal(sort(rownames(y)), sort(colnames(y))))
@@ -23,6 +28,7 @@ hamming_dist <- function(x,y) {
 #' @param x An adjacency matrix
 #' @param y An adjacency matrix
 #' @return Number representing the distance between x and y
+#' @export
 subgraph_dist <- function(x,y) {
     # x and y are full matricies
 
@@ -36,7 +42,7 @@ subgraph_dist <- function(x,y) {
     max_subgraph_size <- max(nrow(y) - 1, min_subgraph_size)
     subgraph_sizes <- min_subgraph_size:max_subgraph_size
 
-    subgraphs <- unlist(lapply(subgraph_sizes, function(size) {combn(rownames(y), size, simplify=F)}), recursive=FALSE)
+    subgraphs <- unlist(lapply(subgraph_sizes, function(size) {utils::combn(rownames(y), size, simplify=F)}), recursive=FALSE)
 
     ix <- igraph::graph_from_adjacency_matrix(x)
     iy <- igraph::graph_from_adjacency_matrix(y[rownames(x), colnames(x)])
@@ -65,6 +71,7 @@ same_reachability <- function(e,f) {
 #' @param x An adjacency matrix
 #' @param y An adjacency matrix
 #' @return Number representing the distance between x and y
+#' @export
 trans_dist <- function(x,y) {
     # number of edits, considering pathways between genes -- a graph is equivalent to its transitive closure
     stopifnot(all.equal(sort(rownames(x)), sort(colnames(x))))
@@ -96,6 +103,7 @@ trans_dist <- function(x,y) {
 #' @param l List of matricies representing graphs of interest
 #' @param distance_function One of the distance metrics defined in this package
 #' @return Distance matricies
+#' @export
 generate_distances <- function(l, distance_function) {
     le <- length(l)
     dist <- matrix(0, ncol=le, nrow=le)
@@ -137,7 +145,10 @@ generate_distances_mnem <- function(res.list, distance_function) {
 #'
 #' @param l A list of adjacency matricies representing the networks of interest
 #' @param distance_function One of the distance metrics defined in this package
+#' @param filename (optional) File to write plot out to
 #' @return Plot object
+#' @import magrittr
+#' @export
 plot_dist <- function(l, distance_function, filename="") {
     l_dists <- generate_distances(l, distance_function)
 
@@ -161,9 +172,9 @@ plot_dist <- function(l, distance_function, filename="") {
     
     # there must be a better way to do this, but everything else seems broken
     if (filename != "") {
-        pdf(filename)
+        grDevices::pdf(filename)
         gridExtra::grid.arrange(plot_networks, plot_heatmap, nrow=2)
-        dev.off()
+        grDevices::dev.off()
     }
     gridExtra::grid.arrange(plot_networks, plot_heatmap, nrow=2)
 }
