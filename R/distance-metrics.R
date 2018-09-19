@@ -41,10 +41,10 @@ subgraph_dist <- function(x,y) {
     ix <- igraph::graph_from_adjacency_matrix(x)
     iy <- igraph::graph_from_adjacency_matrix(y[rownames(x), colnames(x)])
 
-    isomorphic <- unlist(lapply(subgraphs, function(subgraph) {isomorphic(induced_subgraph(ix, subgraph), induced_subgraph(iy, subgraph))}))
+    isomorph <- unlist(lapply(subgraphs, function(subgraph) {igraph::isomorphic(igraph::induced_subgraph(ix, subgraph), igraph::induced_subgraph(iy, subgraph))}))
 
     # normalize result to length of number of subgraphs
-    return ((length(isomorphic) - sum(isomorphic)) / length(isomorphic))
+    return ((length(isomorph) - sum(isomorph)) / length(isomorph))
 
 }
 
