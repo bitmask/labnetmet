@@ -182,7 +182,7 @@ plot_dist <- function(l, distance_function, filename="") {
     images <- l
     for (i in 1:nrow(l_dists)) {
         net <- network::as.network(l[[i]], matrix.type="adjacency", directed=TRUE)
-        palette <- brewer.pal(nrow(l[[1]]), "Paired")
+        palette <- RColorBrewer::brewer.pal(nrow(l[[1]]), "Paired")
         images[[i]] <- GGally::ggnet2(net, mode="circle", label=TRUE, alpha=0.7, size=3, color=palette, arrow.size=4, arrow.gap=.06, edge.color = "grey30", label.size=1.5, layout.exp = 0.3) + theme(aspect.ratio=1)
     }
     plot_networks <- do.call(gridExtra::grid.arrange, c(images, ncol = length(images)))
@@ -198,11 +198,11 @@ plot_dist <- function(l, distance_function, filename="") {
         ggplot2::geom_tile() + 
         ggplot2::geom_text() + 
         ggplot2::theme_minimal() + 
-        ggplot2::theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
         ggplot2::scale_y_discrete(labels=rev(names(l)), limits=rev(levels(l_dists_melt$graph_name_y))) + 
         ggplot2::scale_x_discrete(labels=c()) + 
-        ggplot2::coord_fixed() + 
-        ggplot2::scale_fill_distiller(guide=FALSE, palette="Blues", direction=1)
+        ggplot2::scale_fill_distiller(guide=FALSE, palette="Blues", direction=1) +
+        ggplot2::coord_fixed() +
+        ggplot2::theme(axis.title.x = element_blank(), axis.title.y = element_blank(), axis.ticks=element_blank()) # axis.ticks isn't working??
     
     # there must be a better way to do this, but everything else seems broken
     if (filename != "") {
