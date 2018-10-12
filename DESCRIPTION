@@ -19,7 +19,8 @@ Imports:
     magrittr,
     rlang,
     grDevices,
-    utils
+    utils,
+    RColorBrewer
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
