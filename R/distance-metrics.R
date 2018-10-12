@@ -194,7 +194,15 @@ plot_dist <- function(l, distance_function, filename="") {
     l_dists_melt <- reshape2::melt(l_dists_t, id.vars="graph_name") %>% dplyr::rename(graph_name_y = variable)
 
     # generate the heatmap
-    plot_heatmap <- ggplot2::ggplot(l_dists_melt, ggplot2::aes(x=graph_name, y=graph_name_y, label=value, fill=value)) + ggplot2::geom_tile() + ggplot2::geom_text() + ggplot2::scale_y_discrete(limits=rev(levels(l_dists_melt$graph_name_y))) + ggplot2::theme_void() + ggplot2::coord_fixed() + ggplot2::scale_fill_distiller(guide=FALSE, palette="Blues", direction=1) 
+    plot_heatmap <- ggplot2::ggplot(l_dists_melt, ggplot2::aes(x=graph_name, y=graph_name_y, label=value, fill=value)) + 
+        ggplot2::geom_tile() + 
+        ggplot2::geom_text() + 
+        ggplot2::theme_minimal() + 
+        ggplot2::theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
+        ggplot2::scale_y_discrete(labels=rev(names(l)), limits=rev(levels(l_dists_melt$graph_name_y))) + 
+        ggplot2::scale_x_discrete(labels=c()) + 
+        ggplot2::coord_fixed() + 
+        ggplot2::scale_fill_distiller(guide=FALSE, palette="Blues", direction=1)
     
     # there must be a better way to do this, but everything else seems broken
     if (filename != "") {
