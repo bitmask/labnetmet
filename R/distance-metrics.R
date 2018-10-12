@@ -98,6 +98,32 @@ trans_dist <- function(x,y) {
     return(score)
 }
 
+trans_dist_weighted <- function(x,y) {
+    stopifnot(all.equal(sort(rownames(x)), sort(colnames(x))))
+    stopifnot(all.equal(sort(rownames(y)), sort(colnames(y))))
+    stopifnot(all.equal(nrow(x), nrow(y)))
+
+    ix <- igraph::graph_from_adjacency_matrix(x, weighted=TRUE)
+    iy <- igraph::graph_from_adjacency_matrix(y[rownames(x), colnames(x)], weighted=TRUE)
+
+    dx <- igraph::distances(ix, mode="out")
+    dy <- igraph::distances(iy, mode="out")
+
+    score <- 0
+    for (a in rownames(dx)) {
+        for (b in rownames(dx)) {
+            # is the reachability of a from b the same in both graphs?
+            if(! same_reachability(dx[a,b], dy[a,b])) {
+                score <- score + 1
+            }
+        }
+    }
+    # TODO normalize
+    #score <- score / (length(rownames(dx))^2)
+    return(score)
+
+}
+
 #' Generates all distances between graphs in provided list
 #'
 #' @param l List of matricies representing graphs of interest
@@ -157,7 +183,7 @@ plot_dist <- function(l, distance_function, filename="") {
     for (i in 1:nrow(l_dists)) {
         net <- network::as.network(l[[i]], matrix.type="adjacency", directed=TRUE)
         # TODO: scale the sizes as a function of the number of nodes and networks
-        images[[i]] <- GGally::ggnet2(net, mode="circle", label=TRUE, alpha=0, arrow.size=3, arrow.gap=.02, label.size=2)
+        images[[i]] <- GGally::ggnet2(net, mode="circle", label=TRUE, alpha=0, arrow.size=4, arrow.gap=.02, edge.color = "steelblue", label.size=2, layout.exp = 0.5) + theme(aspect.ratio=1)
     }
     plot_networks <- do.call(gridExtra::grid.arrange, c(images, ncol = length(images)))
 
