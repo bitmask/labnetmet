@@ -202,7 +202,7 @@ plot_dist <- function(l, distance_function, filename="") {
         ggplot2::scale_x_discrete(labels=c()) + 
         ggplot2::scale_fill_distiller(guide=FALSE, palette="Blues", direction=1) +
         ggplot2::coord_fixed() +
-        ggplot2::theme(axis.title.x = element_blank(), axis.title.y = element_blank(), axis.ticks=element_blank()) # axis.ticks isn't working??
+        ggplot2::theme(axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank(), axis.ticks=ggplot2::element_blank()) # axis.ticks isn't working??
     
     # there must be a better way to do this, but everything else seems broken
     if (filename != "") {
