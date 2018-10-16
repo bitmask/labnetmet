@@ -183,7 +183,7 @@ plot_dist <- function(l, distance_function, filename="") {
     for (i in 1:nrow(l_dists)) {
         net <- network::as.network(l[[i]], matrix.type="adjacency", directed=TRUE)
         palette <- RColorBrewer::brewer.pal(nrow(l[[1]]), "Paired")
-        images[[i]] <- GGally::ggnet2(net, mode="circle", label=TRUE, alpha=0.7, size=3, color=palette, arrow.size=4, arrow.gap=.06, edge.color = "grey30", label.size=1.5, layout.exp = 0.3) + theme(aspect.ratio=1)
+        images[[i]] <- GGally::ggnet2(net, mode="circle", label=TRUE, alpha=0.7, size=3, color=palette, arrow.size=4, arrow.gap=.06, edge.color = "grey30", label.size=1.5, layout.exp = 0.3) + ggplot2::theme(aspect.ratio=1)
     }
     plot_networks <- do.call(gridExtra::grid.arrange, c(images, ncol = length(images)))
 
