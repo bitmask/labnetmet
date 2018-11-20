@@ -1,6 +1,6 @@
 
 # prevent devtools::check() from throwing warnings about these names that are not even global variables
-utils::globalVariables(c("variable", "value", "graph_name", "graph_name_y"))
+utils::globalVariables(c("variable", "distance", "graph_name", "graph_name_y"))
 
 #' Find the Hamming distance between two graphs as sum of the absolute value differences between adjacency matricies.
 #'
@@ -177,39 +177,53 @@ generate_distances_mnem <- function(res.list, distance_function) {
 #' @export
 plot_dist <- function(l, distance_function, filename="") {
     l_dists <- generate_distances(l, distance_function)
-
-    # generate network images
-    images <- l
-    for (i in 1:nrow(l_dists)) {
-        net <- network::as.network(l[[i]], matrix.type="adjacency", directed=TRUE)
-        palette <- RColorBrewer::brewer.pal(nrow(l[[1]]), "Paired")
-        images[[i]] <- GGally::ggnet2(net, mode="circle", label=TRUE, alpha=0.7, size=3, color=palette, arrow.size=4, arrow.gap=.06, edge.color = "grey30", label.size=1.5, layout.exp = 0.3) + ggplot2::theme(aspect.ratio=1)
+    generate_networks <- FALSE
+    if (nrow(l_dists) <= 5) {
+        generate_networks <- TRUE
     }
-    plot_networks <- do.call(gridExtra::grid.arrange, c(images, ncol = length(images)))
+    if (generate_networks) {
+        # generate network images
+        images <- l
+        for (i in 1:nrow(l_dists)) {
+            net <- network::as.network(l[[i]], matrix.type="adjacency", directed=TRUE)
+            palette <- RColorBrewer::brewer.pal(nrow(l[[1]]), "Paired")
+            images[[i]] <- GGally::ggnet2(net, mode="circle", label=TRUE, alpha=0.7, size=3, color=palette, arrow.size=4, arrow.gap=.06, edge.color = "grey30", label.size=1.5, layout.exp = 0.3) + ggplot2::theme(aspect.ratio=1)
+        }
+        plot_networks <- do.call(gridExtra::grid.arrange, c(images, ncol = length(images)))
+    }
 
     # turn matrix into long data format
     colnames(l_dists) <- letters[1:nrow(l_dists)]
     l_dists_t <- dplyr::tbl_df(l_dists)
     l_dists_t$graph_name <- letters[1:nrow(l_dists)]
-    l_dists_melt <- reshape2::melt(l_dists_t, id.vars="graph_name") %>% dplyr::rename(graph_name_y = variable)
+    l_dists_melt <- reshape2::melt(l_dists_t, id.vars="graph_name") %>% dplyr::rename(graph_name_y = variable, distance=value)
 
     # generate the heatmap
-    plot_heatmap <- ggplot2::ggplot(l_dists_melt, ggplot2::aes(x=graph_name, y=graph_name_y, label=value, fill=value)) + 
-        ggplot2::geom_tile() + 
-        ggplot2::geom_text() + 
-        ggplot2::theme_minimal() + 
-        ggplot2::scale_y_discrete(labels=rev(names(l)), limits=rev(levels(l_dists_melt$graph_name_y))) + 
-        ggplot2::scale_x_discrete(labels=c()) + 
-        ggplot2::scale_fill_distiller(guide=FALSE, palette="Blues", direction=1) +
-        ggplot2::coord_fixed() +
-        ggplot2::theme(axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank(), axis.ticks=ggplot2::element_blank()) # axis.ticks isn't working??
-    
-    # there must be a better way to do this, but everything else seems broken
+    if (generate_networks) {
+        plot_heatmap <- ggplot2::ggplot(l_dists_melt, ggplot2::aes(x=graph_name, y=graph_name_y, label=distance, fill=distance)) + 
+            ggplot2::geom_tile() + 
+            ggplot2::geom_text() + 
+            ggplot2::theme_minimal() + 
+            ggplot2::scale_y_discrete(labels=rev(names(l)), limits=rev(levels(l_dists_melt$graph_name_y))) + 
+            ggplot2::scale_x_discrete(labels=c()) + 
+            ggplot2::scale_fill_distiller(guide=FALSE, palette="Blues", direction=1) +
+            ggplot2::coord_fixed() +
+            ggplot2::theme(axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank(), axis.ticks=ggplot2::element_blank()) # axis.ticks isn't working??
+    } else {
+        plot_histogram <- ggplot2::ggplot(l_dists_melt, ggplot2::aes(x=distance)) + ggplot2::geom_histogram() + ggplot2::theme_bw()
+    }
+
+    # is there a better way to save the output if a filename is provided?
     if (filename != "") {
         grDevices::pdf(filename)
+    }
+    if (generate_networks) {
         gridExtra::grid.arrange(plot_networks, plot_heatmap, nrow=2)
+    } else {
+        gridExtra::grid.arrange(plot_histogram, nrow=1)
+    }
+    if (filename != "") {
         grDevices::dev.off()
     }
-    gridExtra::grid.arrange(plot_networks, plot_heatmap, nrow=2)
 }
 
