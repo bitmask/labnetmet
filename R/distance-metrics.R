@@ -175,11 +175,14 @@ generate_distances_mnem <- function(res.list, distance_function) {
 #' @return Plot object
 #' @import magrittr
 #' @export
-plot_dist <- function(l, distance_function, filename="") {
+plot_dist <- function(l, distance_function, filename="", draw_networks=NULL) {
     l_dists <- generate_distances(l, distance_function)
     generate_networks <- FALSE
-    if (nrow(l_dists) <= 5) {
+    if (nrow(l_dists) <= 5) { # TODO: set default value for package
         generate_networks <- TRUE
+    }
+    if (! is.null(draw_networks)) {
+        generate_networks <- draw_networks
     }
     if (generate_networks) {
         # generate network images
