@@ -196,10 +196,10 @@ plot_dist <- function(l, distance_function, filename="", draw_networks=NULL) {
     }
 
     # turn matrix into long data format
-    colnames(l_dists) <- letters[1:nrow(l_dists)]
+    colnames(l_dists) <- paste("graph", 1:nrow(l_dists), sep="")
     l_dists_t <- dplyr::tbl_df(l_dists)
-    l_dists_t$graph_name <- letters[1:nrow(l_dists)]
-    l_dists_melt <- reshape2::melt(l_dists_t, id.vars="graph_name") %>% dplyr::rename(graph_name_y = variable, distance=value)
+    l_dists_t$graph_name <- paste("graph", 1:nrow(l_dists), sep="")
+    l_dists_melt <- reshape2::melt(l_dists_t, id.vars="graph_name") %>% dplyr::rename(graph_name_y = variable, distance=value) %>% dplyr::filter(graph_name != graph_name_y)
 
     # generate the heatmap
     if (generate_networks) {
@@ -213,7 +213,7 @@ plot_dist <- function(l, distance_function, filename="", draw_networks=NULL) {
             ggplot2::coord_fixed() +
             ggplot2::theme(axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank(), axis.ticks=ggplot2::element_blank()) # axis.ticks isn't working??
     } else {
-        plot_histogram <- ggplot2::ggplot(l_dists_melt, ggplot2::aes(x=distance)) + ggplot2::geom_histogram() + ggplot2::theme_bw()
+        plot_histogram <- ggplot2::ggplot(l_dists_melt, ggplot2::aes(x=distance)) + ggplot2::geom_bar() + ggplot2::theme_bw()
     }
 
     # is there a better way to save the output if a filename is provided?
