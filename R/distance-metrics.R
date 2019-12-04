@@ -143,6 +143,21 @@ generate_distances <- function(l, distance_function) {
     return(dist)
 }
 
+#' Generates all distances between graphs in provided list, returns in long format
+#'
+#' @param l List of matricies representing graphs of interest
+#' @param distance_function One of the distance metrics defined in this package
+#' @return Distance matricies in long format
+#' @export
+generate_distances_long <- function(l, distance_function) {
+    l_dists <- generate_distances(l, distance_function)
+    colnames(l_dists) <- paste("graph", 1:nrow(l_dists), sep="")
+    l_dists_t <- dplyr::tbl_df(l_dists)
+    l_dists_t$graph_name <- paste("graph", 1:nrow(l_dists), sep="")
+    l_dists_melt <- reshape2::melt(l_dists_t, id.vars="graph_name") %>% dplyr::rename(graph_name_y = variable, distance=value) %>% dplyr::filter(graph_name != graph_name_y)
+    return(l_dists_melt)
+}
+
 #' Generates all distances between graphs returned in an mnem object
 #'
 #' @param res.list As returned from mnem
@@ -228,5 +243,6 @@ plot_dist <- function(l, distance_function, filename="", draw_networks=NULL) {
     if (filename != "") {
         grDevices::dev.off()
     }
+    return(l_dists_melt)
 }
 
