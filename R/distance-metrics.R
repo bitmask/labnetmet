@@ -137,7 +137,7 @@ generate_distances_list <- function(l, n, distance_function_list) {
     comb <- combn(1:length(l), n, simplify=TRUE)
     d <- list()
     if (length(comb) > maxlength) {
-        comb <- sample(comb, maxlength, replace=FALSE)
+        comb <- comb[,sample(1:ncol(comb), maxlength, replace=FALSE)]
     }
     for (i in 1:ncol(comb)) {
         d[[i]] <- distance_function_list(l_ig[comb[,i]])
