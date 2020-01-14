@@ -124,6 +124,27 @@ trans_dist_weighted <- function(x,y) {
 
 }
 
+#' Generates all distances between graphs in provided list for a list based distance function
+#'
+#' @param l List of matricies representing graphs of interest
+#' @param n Number of graphs to pass to the distance function
+#' @param distance_function_list One of the distance metrics defined in this package, must be list based
+#' @return Distance matricies
+#' @export
+generate_distances_list <- function(l, n, distance_function_list) {
+    maxlength <- 10000
+    l_ig <- lapply(l, igraph::graph_from_adjacency_matrix) # note these are igraphs here before the distance function is called
+    comb <- combn(1:length(l), n, simplify=TRUE)
+    d <- list()
+    if (length(comb) > maxlength) {
+        comb <- sample(comb, maxlength, replace=FALSE)
+    }
+    for (i in 1:ncol(comb)) {
+        d[[i]] <- distance_function_list(l_ig[comb[,i]])
+    }
+    return(d)
+}
+
 #' Generates all distances between graphs in provided list
 #'
 #' @param l List of matricies representing graphs of interest
@@ -158,6 +179,7 @@ generate_distances_long <- function(l, distance_function) {
     return(l_dists_melt)
 }
 
+
 #' Generates all distances between graphs returned in an mnem object
 #'
 #' @param res.list As returned from mnem
@@ -181,6 +203,42 @@ generate_distances_mnem <- function(res.list, distance_function) {
     }
     return(dist)
 }
+
+' Plots the networks and a heatmap of distances between them for distances calculated with a list based metric
+#'
+#' @param l A list of adjacency matricies representing the networks of interest
+#' @param distance_function_list One of the distance metrics defined in this package
+#' @param filename (optional) File to write plot out to
+#' @return Plot object
+#' @import magrittr
+#' @export
+plot_dist_list <- function(l, distance_function_list, filename="") {
+    l_dists <- data.frame("idx"=integer(), "n"=integer(), "edges"=integer())
+    edges <- unlist(lapply(l, sum))
+    n <- rep(1, length(edges))
+    idx <- 1:length(edges)
+    l_dists <- rbind(l_dists, cbind(idx, cbind(n, edges)))
+
+    r <- 2:length(l)
+    for (i in r) {
+        print(paste0("i=", i))
+        edges <- unlist(generate_distances_list(l, i, distance_function_list))
+        n <- rep(i, length(edges))
+        idx <- 1:length(edges)
+        l_dists <- rbind(l_dists, cbind(idx, cbind(n, edges)))
+        if (sum(edges) == 0) {
+            break # if all n-1 intersections are 0 then n and n+k will all be 0 also
+        }
+    }
+    #ggplot2::ggplot(l_dists, aes(x=edges)) + geom_histogram() + facet_wrap(n ~ .)
+    #ggplot2::ggplot(l_dists, aes(x=idx, y=edges)) + geom_point() + facet_wrap(n ~ .)
+    ggplot2::ggplot(l_dists, ggplot2::aes(x=n, y=edges, group=n)) + ggplot2::geom_boxplot()
+    if (filename != "") {
+        ggplot2::ggsave(filename)
+    }
+}
+
+
 
 #' Plots the networks and a heatmap of distances between them
 #'
@@ -245,4 +303,68 @@ plot_dist <- function(l, distance_function, filename="", draw_networks=NULL) {
     }
     return(l_dists_melt)
 }
+
+#' Calculates the distances between k random networks of n nodes each
+#'
+#' @param distance_function One of the distance metrics defined in this package
+#' @return A network as an adjacency matrix
+#' @export
+calculate_random_dist_list <- function(distance_function_list) {
+    for (p in seq(0.2, 0.5, 0.1)) { #random probability
+    #for (p in seq(1.2, 2.0, 0.1)) { #barabasi power
+        n <- 10
+        k <- 25
+        filename <- paste0("~/projects/simulate/random_graph_distance/intersectdist_randomnet_n", n, "_k", k, "_p", p, ".pdf")
+        #filename <- paste0("~/projects/simulate/random_graph_distance/barabasinet_n", n, "_k", k, "_p", p, ".pdf")
+        l <- generate_random_networks(n, k, p, distance_function, filename=filename)
+        plot_dist_list(l, distance_function_list, filename=filename)
+    }
+}
+
+#' Calculates the distances between k random networks of n nodes each
+#'
+#' @param n The number of nodes desired
+#' @param k The number of random networks
+#' @param p The probability of generating an edge between two nodes
+#' @param distance_function One of the distance metrics defined in this package
+#' @return A network as an adjacency matrix
+#' @export
+generate_random_networks <- function(n, k, p, distance_function, filename="") {
+    l <- list()
+    for (i in 1:k) {
+        ig <- igraph::erdos.renyi.game(n, p, type="gnp", directed=TRUE, loops=FALSE)
+        #ig <- igraph::barabasi.game(n, power=p, directed=TRUE)
+        m <- as.matrix(igraph::get.adjacency(ig))
+        rownames(m) <- letters[1:n]
+        colnames(m) <- rownames(m)
+        l[[i]] <- m
+    }
+    return(l)
+}
+
+#' Find the largest subgraph shared by the arguments
+#'
+#' @param x 
+#' @param y 
+#' @param n
+#' @return number of shared edges
+#' @export
+intersect_dist <- function(x, y) {
+    ig <- igraph::intersection(igraph::graph_from_adjacency_matrix(x), igraph::graph_from_adjacency_matrix(y), byname=TRUE)
+    return(igraph::gsize(ig))
+}
+
+#' Find the largest subgraph shared by the networks in the list
+#'
+#' @param l_ig A list of igraph objects
+#' @return number of edges in the largest subgraph of all graphs
+#' @export
+intersect_dist_list <- function(l_ig) {
+    ig <- l_ig[[1]]
+    for (i in 2:length(l_ig)) {
+        ig <- igraph::intersection(ig, l_ig[[i]], byname=TRUE)
+    }
+    return(igraph::gsize(ig))
+}
+
 
