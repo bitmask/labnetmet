@@ -311,15 +311,29 @@ plot_dist <- function(l, distance_function, filename="", draw_networks=NULL) {
 #' @export
 calculate_random_dist_list <- function(distance_function_list) {
     for (p in seq(0.2, 0.5, 0.1)) { #random probability
-    #for (p in seq(1.2, 2.0, 0.1)) { #barabasi power
         n <- 10
         k <- 25
         filename <- paste0("~/projects/simulate/random_graph_distance/intersectdist_randomnet_n", n, "_k", k, "_p", p, ".pdf")
-        #filename <- paste0("~/projects/simulate/random_graph_distance/barabasinet_n", n, "_k", k, "_p", p, ".pdf")
         l <- generate_random_networks(n, k, p, distance_function, filename=filename)
         plot_dist_list(l, distance_function_list, filename=filename)
     }
 }
+
+#' Calculates the distances between k scale free networks of n nodes each
+#'
+#' @param distance_function One of the distance metrics defined in this package
+#' @return A network as an adjacency matrix
+#' @export
+calculate_barabasi_dist_list <- function(distance_function_list) {
+    for (p in seq(1.2, 2.0, 0.1)) { #barabasi power
+        n <- 10
+        k <- 25
+        filename <- paste0("~/projects/simulate/random_graph_distance/barabasinet_n", n, "_k", k, "_p", p, ".pdf")
+        l <- generate_barabasi_networks(n, k, p, distance_function, filename=filename)
+        plot_dist_list(l, distance_function_list, filename=filename)
+    }
+}
+
 
 #' Calculates the distances between k random networks of n nodes each
 #'
@@ -334,6 +348,26 @@ generate_random_networks <- function(n, k, p, distance_function, filename="") {
     for (i in 1:k) {
         ig <- igraph::erdos.renyi.game(n, p, type="gnp", directed=TRUE, loops=FALSE)
         #ig <- igraph::barabasi.game(n, power=p, directed=TRUE)
+        m <- as.matrix(igraph::get.adjacency(ig))
+        rownames(m) <- letters[1:n]
+        colnames(m) <- rownames(m)
+        l[[i]] <- m
+    }
+    return(l)
+}
+
+#' Calculates the distances between k random networks of n nodes each
+#'
+#' @param n The number of nodes desired
+#' @param k The number of random networks
+#' @param p The probability of generating an edge between two nodes
+#' @param distance_function One of the distance metrics defined in this package
+#' @return A network as an adjacency matrix
+#' @export
+generate_barabasi_networks <- function(n, k, p, distance_function, filename="") {
+    l <- list()
+    for (i in 1:k) {
+        ig <- igraph::barabasi.game(n, power=p, directed=TRUE)
         m <- as.matrix(igraph::get.adjacency(ig))
         rownames(m) <- letters[1:n]
         colnames(m) <- rownames(m)
