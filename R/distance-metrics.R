@@ -128,11 +128,11 @@ trans_dist_weighted <- function(x,y) {
 #'
 #' @param l List of matricies representing graphs of interest
 #' @param n Number of graphs to pass to the distance function
-#' @param distance_function_list One of the distance metrics defined in this package, must be list based
+#' @param distance_function_list One of the distance metrics defined in this package, must be list based (not pair based)
 #' @return Distance matricies
 #' @export
 generate_distances_list <- function(l, n, distance_function_list) {
-    maxlength <- 10000
+    maxlength <- 1000
     l_ig <- lapply(l, igraph::graph_from_adjacency_matrix) # note these are igraphs here before the distance function is called
     comb <- combn(1:length(l), n, simplify=TRUE)
     d <- list()
@@ -219,7 +219,8 @@ plot_dist_list <- function(l, distance_function_list, filename="") {
     idx <- 1:length(edges)
     l_dists <- rbind(l_dists, cbind(idx, cbind(n, edges)))
 
-    r <- 2:length(l)
+    maxcompare <- min(5, length(l))
+    r <- 2:maxcompare
     for (i in r) {
         print(paste0("i=", i))
         edges <- unlist(generate_distances_list(l, i, distance_function_list))
