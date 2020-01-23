@@ -232,7 +232,7 @@ plot_dist_list <- function(l, distance_function_list, filename="") {
     }
     #ggplot2::ggplot(l_dists, aes(x=edges)) + geom_histogram() + facet_wrap(n ~ .)
     #ggplot2::ggplot(l_dists, aes(x=idx, y=edges)) + geom_point() + facet_wrap(n ~ .)
-    ggplot2::ggplot(l_dists, ggplot2::aes(x=n, y=edges, group=n)) + ggplot2::geom_boxplot()
+    ggplot2::ggplot(l_dists, ggplot2::aes(x=n, y=edges, group=n)) + ggplot2::geom_boxplot() + ggplot2::theme_bw() + ggplot2::expand_limits(x=0, y=0)
     if (filename != "") {
         ggplot2::ggsave(filename)
     }
