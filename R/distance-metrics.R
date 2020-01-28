@@ -305,19 +305,24 @@ plot_dist <- function(l, distance_function, filename="", draw_networks=NULL) {
     return(l_dists_melt)
 }
 
+
+# TODO: calculate random parameters from data and generate null model
+find_parameters_for_nullmodel <- function(l) {
+    number_of_nodes <- length(nrow(l[[1]]))
+    k <- length(l)
+    probability_of_edges <- as.integer(median(unlist(unname(lapply(trimmed_graphs, sum))))) / (number_of_nodes^2 - number_of_nodes)
+    return(c(number_of_nodes, k, probability_of_edges))
+}
+
+
 #' Calculates the distances between k random networks of n nodes each
 #'
 #' @param distance_function One of the distance metrics defined in this package
 #' @return A network as an adjacency matrix
 #' @export
-calculate_random_dist_list <- function(distance_function_list) {
-    for (p in seq(0.2, 0.5, 0.1)) { #random probability
-        n <- 10
-        k <- 25
-        filename <- paste0("~/projects/simulate/random_graph_distance/intersectdist_randomnet_n", n, "_k", k, "_p", p, ".pdf")
-        l <- generate_random_networks(n, k, p, distance_function, filename=filename)
-        plot_dist_list(l, distance_function_list, filename=filename)
-    }
+calculate_random_dist_list <- function(distance_function_list, filename, n, k, p) {
+    l <- generate_random_networks(n, k, p, distance_function, filename=filename)
+    plot_dist_list(l, distance_function_list, filename=filename)
 }
 
 #' Calculates the distances between k scale free networks of n nodes each
