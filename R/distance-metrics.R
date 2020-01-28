@@ -222,7 +222,6 @@ plot_dist_list <- function(l, distance_function_list, filename="") {
     maxcompare <- min(5, length(l))
     r <- 2:maxcompare
     for (i in r) {
-        print(paste0("i=", i))
         edges <- unlist(generate_distances_list(l, i, distance_function_list))
         n <- rep(i, length(edges))
         idx <- 1:length(edges)
@@ -321,7 +320,7 @@ find_parameters_for_nullmodel <- function(l) {
 #' @return A network as an adjacency matrix
 #' @export
 calculate_random_dist_list <- function(distance_function_list, filename, n, k, p) {
-    l <- generate_random_networks(n, k, p, distance_function, filename=filename)
+    l <- generate_random_networks(n, k, p, filename=filename)
     plot_dist_list(l, distance_function_list, filename=filename)
 }
 
@@ -346,10 +345,9 @@ calculate_barabasi_dist_list <- function(distance_function_list) {
 #' @param n The number of nodes desired
 #' @param k The number of random networks
 #' @param p The probability of generating an edge between two nodes
-#' @param distance_function One of the distance metrics defined in this package
 #' @return A network as an adjacency matrix
 #' @export
-generate_random_networks <- function(n, k, p, distance_function, filename="") {
+generate_random_networks <- function(n, k, p, filename="") {
     l <- list()
     for (i in 1:k) {
         ig <- igraph::erdos.renyi.game(n, p, type="gnp", directed=TRUE, loops=FALSE)
