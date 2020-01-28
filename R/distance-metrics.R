@@ -308,7 +308,7 @@ plot_dist <- function(l, distance_function, filename="", draw_networks=NULL) {
 
 # TODO: calculate random parameters from data and generate null model
 find_parameters_for_nullmodel <- function(l) {
-    number_of_nodes <- length(nrow(l[[1]]))
+    number_of_nodes <- nrow(l[[1]])
     k <- length(l)
     probability_of_edges <- as.integer(median(unlist(unname(lapply(l, sum))))) / (number_of_nodes^2 - number_of_nodes)
     return(c(number_of_nodes, k, probability_of_edges))
